@@ -33,7 +33,9 @@ import matplotlib.patches as mpatches
 import numpy as np
 from pat_abc import pat_base
 import csv
-
+import re
+import time
+import datetime
 
 class Cpu(pat_base):
     """Contains all functions related to cpu. Also contains data_array which \
@@ -195,7 +197,7 @@ def get_avg_data(cluster, name_node):
         return None
 
 
-def plot_graph(data_array, pp, graph_title):
+def plot_graph(data_array, pp, graph_title, stage_info, log_path, base_time):
     """plot all cpu related graphs"""
 
     # data_array1 = data_array
@@ -294,6 +296,32 @@ def plot_graph(data_array, pp, graph_title):
     ax1.set_xlabel('time(s)')
     ax1.set_title(graph_title + ' cpu utilization')
     ax1.grid(True)
+
+    ################################ Start plotting the stage info #################################
+    if stage_info:
+
+        _spark_stage_submit = re.compile("^(\d{2}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) INFO scheduler.DAGScheduler: Submitting ([a-zA-Z0-9_]*Stage \d+) \((.*)\).+$") # submit spark stage
+        _spark_stage_finish = re.compile("^(\d{2}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) INFO scheduler.DAGScheduler: ([a-zA-Z0-9_]*Stage \d+) \((.*)\) finished.+$")   # spark stage finish
+
+        starttime=datetime.datetime.strptime(base_time,r"%y/%m/%d %H:%M:%S")
+
+        with open(log_path,'r') as f:
+            while True:
+                line = f.readline().rstrip()
+                if not line: break
+                for rule in [_spark_stage_submit,_spark_stage_finish]:
+                    matched = rule.match(line)
+                    if matched:
+                        result = matched.groups()
+                        timestamp = datetime.datetime.strptime(result[0], r"%y/%m/%d %H:%M:%S") # convert to millsec for js
+                        if rule is _spark_stage_submit:
+                          plt.axvline((timestamp-starttime).seconds,color='crimson',linestyle="-.",linewidth=0.7)
+                          plt.text((timestamp-starttime).seconds-0.5, 50,r'Start '+ result[1],size = 8, color='seagreen',alpha = 1,rotation=90)
+                        elif rule is _spark_stage_finish:
+                          plt.axvline((timestamp-starttime).seconds,color='crimson',linestyle="-.",linewidth=0.7)
+                          plt.text((timestamp-starttime).seconds+0.1, 80, r'Finish '+result[1],size = 8, color='cadetblue',alpha = 1,rotation=90)
+    ################################Finish plotting the stage info #################################
+
     fig.text(0.95, 0.05, pp.get_pagecount()+1, fontsize=10)
     pp.savefig(dpi=200)
     plt.clf()

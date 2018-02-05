@@ -35,7 +35,7 @@ import perf_module
 import xml.etree.ElementTree as ET
 import sys
 import time
-
+import datetime
 
 #==================== Python version =========================
 cur_python_version = sys.version_info
@@ -166,11 +166,13 @@ class Node(object):
             self.file_paths.append(self.node_folder_path + self.file_name)
         return self.file_paths
 
+base_timestamp = 0
 
 def adjust_timestamps(cluster):
     """Synchronize timetamps accross all nodes"""
 
     if hasattr(cluster[0], 'cpu_obj'):
+	global base_timestamp
         base_timestamp = cluster[0].cpu_obj.time_stamp_array[0]
     elif hasattr(cluster[0], 'disk_obj'):
         base_timestamp = cluster[0].disk_obj.time_stamp_array[0]
@@ -239,6 +241,7 @@ def make_cluster(result_path):
 
 def generate_output(cluster):
     config_file = None
+    enable_stageinfo = False
     if len(sys.argv) > 1:
         config_file = sys.argv[1]
     else:
@@ -258,6 +261,7 @@ def generate_output(cluster):
         en_all_net = root[0].find('all-nodes-net').text
         en_all_perf = root[0].find('all-nodes-perf').text
         en_all_memory = root[0].find('all-nodes-memory').text
+	en_stage_info = root[0].find('enable-stage-info').text
         en_xl = root[1].get('enable')
         en_cpu_xl = root[1].find('cpu').text
         en_disk_xl = root[1].find('disk').text
@@ -278,18 +282,30 @@ def generate_output(cluster):
 
         # global pdf file that will contain all charts
         pp = PdfPages(result_path + '/PAT-Result.pdf')
+	
+	#stdout log file, for stage info parsing
+	log_path = os.path.join(result_path, '../jobhistory/stdout')
+
+	#to get base_time_stamp here for stage info drawing in modeules
+	base_time = datetime.datetime.fromtimestamp(base_timestamp)
+	base_time_string = base_time.strftime("%y/%m/%d %H:%M:%S")
+	print "----sophia debug in generate report", base_time_string, "----"
+	
+        #to check whether user enabled the stageInfo drawing
+	if en_stage_info == 'yes' or en_stage_info == 'Yes':
+            enable_stageinfo = True	
 
         # print average cpu utilization graph to pdf
         if en_avg_cpu == 'yes' or en_avg_cpu == 'Yes':
             cpu_data = cpu_module.get_avg_data(cluster, name_node)
             if cpu_data is not None:
-                cpu_module.plot_graph(cpu_data, pp, 'All-nodes average')
+                cpu_module.plot_graph(cpu_data, pp, 'All-nodes average', enable_stageinfo, log_path, base_time_string)
 
         # print average disk utilization graph to pdf
         if en_avg_disk == 'yes' or en_avg_disk == 'Yes':
             disk_data = disk_module.get_avg_data(cluster, name_node)
             if disk_data is not None:
-                disk_module.plot_graph(disk_data, pp, 'All-nodes average')
+                disk_module.plot_graph(disk_data, pp, 'All-nodes average', enable_stageinfo, log_path, base_time_string)
 
         # print average network utilization graph to pdf
         if en_avg_net == 'yes' or en_avg_net == 'Yes':
@@ -316,7 +332,7 @@ def generate_output(cluster):
         if en_avg_memory == 'yes' or en_avg_memory == 'Yes':
             memory_data = memory_module.get_avg_data(cluster, name_node)
             if memory_data is not None:
-                memory_module.plot_graph(memory_data, pp, "All-nodes average")
+                memory_module.plot_graph(memory_data, pp, "All-nodes average", enable_stageinfo, log_path, base_time_string)
 
         # print data graphs for each individual node
         for node in cluster:
@@ -324,12 +340,12 @@ def generate_output(cluster):
                 if hasattr(node, 'cpu_obj'):
                     node_name = node.cpu_obj.data_array[1][0]
                     cpu_module.plot_graph(
-                        node.cpu_obj.avg_array, pp, str(node_name))
+                        node.cpu_obj.avg_array, pp, str(node_name), enable_stageinfo, log_path, base_time_string)
             if en_all_disk == 'yes' or en_all_disk == 'Yes':
                 if hasattr(node, 'disk_obj'):
                     node_name = node.disk_obj.data_array[1][0]
                     disk_module.plot_graph(
-                        node.disk_obj.avg_array, pp, str(node_name))
+                        node.disk_obj.avg_array, pp, str(node_name), enable_stageinfo, log_path, base_time_string)
             if en_all_net == 'yes' or en_all_net == 'Yes':
                 node_name = node.net_obj.data_array[1][0]
                 net_module.plot_graph(
@@ -356,7 +372,7 @@ def generate_output(cluster):
             if en_all_memory == 'yes' or en_all_memory == 'Yes':
                 node_name = node.memory_obj.data_array[1][0]
                 memory_module.plot_graph(
-                    node.memory_obj.avg_array, pp, str(node_name))
+                    node.memory_obj.avg_array, pp, str(node_name), enable_stageinfo, log_path, base_time_string)
         print "----Finished pdf", time.ctime(), "----"
         pp.close()
 

@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.-->
 		<all-nodes-net>no</all-nodes-net>
 		<all-nodes-perf>no</all-nodes-perf>
 		<all-nodes-memory>no</all-nodes-memory>
+		<enable-stage-info>yes</enable-stage-info>
 	</pdf>
 	<excel enable='yes'>
 		<cpu>yes</cpu>
@@ -52,6 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.-->
 		<csv-perf>yes</csv-perf>
 		<csv-memory>yes</csv-memory>
 	</csv-format>
-    <source>/foo/bar/instruments/</source>
+    <source>../PAT-collecting-data/results/2018-01-24-14-25-57/instruments/</source>
     <exclude-node>exclude-node</exclude-node>
 </post-config>
