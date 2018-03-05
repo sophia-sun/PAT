@@ -272,9 +272,8 @@ def plot_graph(data, pp, graph_title, stage_info, log_path, base_time):
         starttime=datetime.datetime.strptime(base_time,r"%y/%m/%d %H:%M:%S")
 
         with open(log_path,'r') as f:
-            while True:
-                line = f.readline().rstrip()
-                if not line: break
+            for l in f.readlines():
+                line = l.rstrip()
                 for rule in [_spark_stage_submit,_spark_stage_finish]:
                     matched = rule.match(line)
                     if matched:
@@ -286,6 +285,7 @@ def plot_graph(data, pp, graph_title, stage_info, log_path, base_time):
                         elif rule is _spark_stage_finish:
                             plt.axvline((timestamp-starttime).seconds,color='crimson',linestyle="-.",linewidth=0.7)
                             plt.text((timestamp-starttime).seconds+0.1, 0.5, r'Finish '+result[1], size = 8, verticalalignment='bottom', color='cadetblue',alpha = 1,rotation=90)
+        f.close()
     ################################Finish plotting the stage info #################################
 
     fig.text(0.95, 0.05, pp.get_pagecount() + 1, fontsize=10)

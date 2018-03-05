@@ -304,22 +304,23 @@ def plot_graph(data_array, pp, graph_title, stage_info, log_path, base_time):
         _spark_stage_finish = re.compile("^(\d{2}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) INFO scheduler.DAGScheduler: ([a-zA-Z0-9_]*Stage \d+) \((.*)\) finished.+$")   # spark stage finish
 
         starttime=datetime.datetime.strptime(base_time,r"%y/%m/%d %H:%M:%S")
-
+#        print "----sophia debug in cpu plot_graph starttime", starttime, "----"
         with open(log_path,'r') as f:
-            while True:
-                line = f.readline().rstrip()
-                if not line: break
+            for l in f.readlines():
+                line = l.rstrip()
                 for rule in [_spark_stage_submit,_spark_stage_finish]:
                     matched = rule.match(line)
                     if matched:
                         result = matched.groups()
                         timestamp = datetime.datetime.strptime(result[0], r"%y/%m/%d %H:%M:%S") # convert to millsec for js
+                        #print "--sophia debug in cpu plot_graph timestamp", timestamp, "----"
                         if rule is _spark_stage_submit:
                           plt.axvline((timestamp-starttime).seconds,color='crimson',linestyle="-.",linewidth=0.7)
-                          plt.text((timestamp-starttime).seconds-0.5, 50,r'Start '+ result[1],size = 8, color='seagreen',alpha = 1,rotation=90)
+                          plt.text((timestamp-starttime).seconds-0.5, 50,r'Start '+ result[1],size = 6, color='red',alpha = 1,rotation=90)
                         elif rule is _spark_stage_finish:
-                          plt.axvline((timestamp-starttime).seconds,color='crimson',linestyle="-.",linewidth=0.7)
-                          plt.text((timestamp-starttime).seconds+0.1, 80, r'Finish '+result[1],size = 8, color='cadetblue',alpha = 1,rotation=90)
+                          plt.axvline((timestamp-starttime).seconds,color='green',linestyle="-.",linewidth=0.7)
+                          plt.text((timestamp-starttime).seconds+0.1, 80, r'Finish '+result[1],size = 6, color='seagreen',alpha = 1,rotation=90)
+        f.close()
     ################################Finish plotting the stage info #################################
 
     fig.text(0.95, 0.05, pp.get_pagecount()+1, fontsize=10)

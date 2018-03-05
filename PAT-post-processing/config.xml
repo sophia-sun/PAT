@@ -39,20 +39,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.-->
 		<all-nodes-memory>no</all-nodes-memory>
 		<enable-stage-info>yes</enable-stage-info>
 	</pdf>
-	<excel enable='yes'>
-		<cpu>yes</cpu>
-		<disk>yes</disk>
-		<net>yes</net>
-		<perf>yes</perf>
-		<memory>yes</memory>
+	<excel enable='no'>
+		<cpu>no</cpu>
+		<disk>no</disk>
+		<net>no</net>
+		<perf>no</perf>
+		<memory>no</memory>
 	</excel>
-	<csv-format enable='yes'>
-		<csv-cpu>yes</csv-cpu>
-		<csv-disk>yes</csv-disk>
-		<csv-net>yes</csv-net>
-		<csv-perf>yes</csv-perf>
-		<csv-memory>yes</csv-memory>
+	<csv-format enable='no'>
+		<csv-cpu>no</csv-cpu>
+		<csv-disk>no</csv-disk>
+		<csv-net>no</csv-net>
+		<csv-perf>no</csv-perf>
+		<csv-memory>no</csv-memory>
 	</csv-format>
-    <source>../PAT-collecting-data/results/2018-01-24-14-25-57/instruments/</source>
+    <source>../PAT-collecting-data/results/tpcx-hs_hsw_testing_100G_1x_0228/instruments/</source>
     <exclude-node>exclude-node</exclude-node>
 </post-config>

@@ -289,11 +289,12 @@ def generate_output(cluster):
 	#to get base_time_stamp here for stage info drawing in modeules
 	base_time = datetime.datetime.fromtimestamp(base_timestamp)
 	base_time_string = base_time.strftime("%y/%m/%d %H:%M:%S")
-	print "----sophia debug in generate report", base_time_string, "----"
+	#print "----sophia debug in generate report", base_time_string, "----"
 	
         #to check whether user enabled the stageInfo drawing
 	if en_stage_info == 'yes' or en_stage_info == 'Yes':
-            enable_stageinfo = True	
+            enable_stageinfo = True
+	    print "----sophia debug en_stage_info", enable_stageinfo, "----"	
 
         # print average cpu utilization graph to pdf
         if en_avg_cpu == 'yes' or en_avg_cpu == 'Yes':
